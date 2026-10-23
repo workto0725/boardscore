@@ -82,7 +82,7 @@
 <section id="diceOverlay" class="dice-overlay hidden" role="dialog" aria-modal="true" aria-label="가상 주사위 굴리기">
 <div class="dice-panel"><div class="top"><h2 style="margin:0">🎲 가상 주사위</h2><button class="btn small" onclick="closeDice()">닫기 ✕</button></div>
 <p class="helper">잃어버린 주사위 대신 사용하세요. 개수와 색을 고른 뒤 폰을 흔들거나 버튼을 누르면 됩니다.</p>
-<div class="dice-config"><label>주사위 사용 방식<select id="diceMode" onchange="setDiceMode()"><option value="vegas" selected>주사위 빼기 (기본)</option><option value="normal">일반 주사위</option></select></label><label id="diceModeInfo">주사위를 굴리고 결과를 확인하세요.</label></div><div class="dice-config"><label>주사위 개수<select id="diceCount" onchange="updateDiceSettings()"><option value="1" >1개</option><option value="2" selected>2개</option><option value="3" >3개</option><option value="4" >4개</option><option value="5" >5개</option><option value="6" >6개</option><option value="7" >7개</option><option value="8" >8개</option><option value="9" >9개</option><option value="10" >10개</option><option value="11" >11개</option><option value="12" >12개</option></select></label>
+<div class="dice-config"><label>주사위 사용 방식<select id="diceMode" onchange="setDiceMode()"><option value="normal" selected>일반 주사위 (기본)</option><option value="vegas">주사위 빼기</option></select></label><label id="diceModeInfo">주사위를 굴리고 결과를 확인하세요.</label></div><div class="dice-config"><label>주사위 개수<select id="diceCount" onchange="updateDiceSettings()"><option value="1" >1개</option><option value="2" selected>2개</option><option value="3" >3개</option><option value="4" >4개</option><option value="5" >5개</option><option value="6" >6개</option><option value="7" >7개</option><option value="8" >8개</option><option value="9" >9개</option><option value="10" >10개</option><option value="11" >11개</option><option value="12" >12개</option></select></label>
 <label>기본 색깔<select id="diceColor" onchange="setAllDiceColors()"><option value="#f7faf7">흰색</option><option value="#ee6767">빨강</option><option value="#62a9f6">파랑</option><option value="#f6d26e">노랑</option><option value="#79d3a3">초록</option><option value="#b79aff">보라</option><option value="#252e35">검정</option></select></label></div>
 <div id="diceTray" class="dice-tray" aria-live="polite"></div>
 <p id="diceTapHint" class="dice-hint">주사위를 하나씩 터치하면 그 주사위의 색을 바꿀 수 있어요.</p><div id="diceVegasTools" class="hidden"><div id="diceAvailable" class="note"></div><div id="diceUsed" class="dice-tray" aria-label="사용 완료한 주사위"></div><div class="bar"><button class="btn" onclick="resetVegasDice()">↺ 새 게임 시작</button></div></div>
@@ -152,7 +152,7 @@ function toggleFirstGuide(){document.getElementById('firstGuide').classList.togg
 let appNavigationReady=false;
 const diceFaces=['⚀','⚁','⚂','⚃','⚄','⚅'];
 const dicePalette=['#f7faf7','#ee6767','#62a9f6','#f6d26e','#79d3a3','#b79aff','#252e35'];
-let diceMode='vegas',diceUsed=Array(12).fill(false),diceMustReroll=false;
+let diceMode='normal',diceUsed=Array(12).fill(false),diceMustReroll=false;
 let diceColors=Array(12).fill('#f7faf7'),diceValues=[],diceLastRoll=0,diceMotionEnabled=false,diceLastShake=0;
 function diceRandom(){if(window.crypto?.getRandomValues){const a=new Uint32Array(1),limit=Math.floor(4294967296/6)*6;do{crypto.getRandomValues(a)}while(a[0]>=limit);return a[0]%6+1}return Math.floor(Math.random()*6)+1}
 function updateDiceSettings(){const count=Number(document.getElementById('diceCount').value);diceValues=Array(count).fill(null);diceUsed=Array(12).fill(false);diceMustReroll=false;renderDice();updateVegasStatus()}
