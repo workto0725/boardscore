@@ -23,3 +23,25 @@ assert.equal(result.fail,-10,'Skull King: bonus must not count on missed bid');
 assert.equal(result.success,70,'Skull King: bonus counts on successful bid');
 assert.equal(result.points,25,'7 Wonders: 21 science + 4 coins');
 console.log('Scoring regression checks passed',result);
+
+const diceSource=source.slice(source.indexOf('const diceFaces='),source.indexOf('function showHome(fromHistory=false)'));
+assert.ok(diceSource.includes('function sortDiceByValue()'));
+assert.ok(diceSource.includes('function restoreUsedDie(i)'));
+assert.ok(diceSource.includes('function setDiceMode()'));
+assert.ok(diceSource.includes('function rollDice()'));
+const diceElements = new Map();
+const element = id => {if(!diceElements.has(id))diceElements.set(id,{value:id==='diceCount'?'6':'normal',classList:{toggle(){},contains(){return false}},textContent:'',innerHTML:'',style:{}});return diceElements.get(id)};
+const diceCtx={document:{getElementById:element},window:{crypto:{getRandomValues:a=>{a[0]=10;return a}}},crypto:{getRandomValues:a=>{a[0]=10;return a}},console,Math,Date,Array,Uint32Array,navigator:{},setInterval,clearInterval,confirm:()=>true,toast:()=>{}};
+vm.createContext(diceCtx);
+vm.runInContext(diceSource,diceCtx);
+const diceCheck=vm.runInContext(`(()=>{
+diceValues=[4,1,3,4,2,6];diceColors=['#ee6767','#62a9f6','#ee6767','#62a9f6','#f6d26e','#f7faf7'];diceMode='normal';
+setDiceMode();const preserved=diceValues.join(',')==='4,1,3,4,2,6';
+diceMode='vegas';useVegasDice(0);
+const removed=diceUsed[0]===true&&diceValues[0]===4;
+restoreUsedDie(0);const restored=!diceUsed[0]&&diceValues[0]===4;
+sortDiceByValue();const sorted=diceValues.join(',')==='1,2,3,4,4,6';
+return {preserved,removed,restored,sorted};
+})()`,diceCtx);
+for(const [name,passed] of Object.entries(diceCheck))assert.ok(passed,'Dice check failed: '+name);
+console.log('Dice regression checks passed',diceCheck);
