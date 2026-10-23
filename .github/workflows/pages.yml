@@ -31,6 +31,8 @@ jobs:
           for (const source of scripts) new vm.Script(source);
           console.log('Validated', scripts.length, 'inline scripts');
           NODE
+      - name: Run scoring regression tests
+        run: node tests/score.test.cjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
