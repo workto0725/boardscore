@@ -1,0 +1,25 @@
+const fs = require('node:fs');
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const html = fs.readFileSync('index.html','utf8');
+const source = html.split('<script>').slice(1).map(x => x.split('</script>')[0]).join('\n');
+new vm.Script(source);
+const ctx = { console, localStorage: {getItem:()=>null}, document:{}, window:{}, structuredClone };
+vm.createContext(ctx);
+const block = source.slice(source.indexOf('const f='),source.indexOf('function persist()'));
+if (!block.includes('function skullScore')) throw Error('Cannot find scoring functions');
+vm.runInContext(block,ctx);
+const result = vm.runInContext(`(()=>{
+gameId='skull';
+players=[{name:'A',values:{extra:0},rounds:[{bid:1,won:0,bonus:50}]}];
+const fail=skullScore(players[0],0);
+players[0].rounds[0].won=1;
+const success=skullScore(players[0],0);
+gameId='wonders';
+const points=GAME.wonders.calc({gear:3,tablet:2,compass:1,coins:14});
+return {fail,success,points};
+})()`,ctx);
+assert.equal(result.fail,-10,'Skull King: bonus must not count on missed bid');
+assert.equal(result.success,70,'Skull King: bonus counts on successful bid');
+assert.equal(result.points,25,'7 Wonders: 21 science + 4 coins');
+console.log('Scoring regression checks passed',result);
