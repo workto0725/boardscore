@@ -26,7 +26,7 @@ jobs:
           node - <<'NODE'
           const fs=require('node:fs'), vm=require('node:vm');
           const html=fs.readFileSync('index.html','utf8');
-          const scripts=[...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)].map(m=>m[1]).filter(s=>s.trim());
+          const scripts=html.split('<script>').slice(1).map(s=>s.split('</script>')[0]).filter(s=>s.trim());
           if (!scripts.length) throw new Error('No application JavaScript found');
           for (const source of scripts) new vm.Script(source);
           console.log('Validated', scripts.length, 'inline scripts');
