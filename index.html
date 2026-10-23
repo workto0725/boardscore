@@ -35,8 +35,8 @@
 #forms{scroll-margin-top:100px}
 @media(max-width:700px){
  .quickactions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
- .quickactions>.moremenu{grid-column:1/-1;width:100%}
- .quickactions>.moremenu>.moreitems{position:static;left:auto;right:auto;top:auto;width:100%;box-sizing:border-box;margin-top:8px;box-shadow:none}
+ .quickactions>.moremenu{grid-column:2;width:100%;min-width:0}
+ .quickactions>.moremenu>.moreitems{position:relative;left:calc(-100% - 8px);right:auto;top:auto;width:calc(200% + 8px);box-sizing:border-box;margin-top:8px;box-shadow:none}
  .quickactions>.moremenu>summary{width:100%;box-sizing:border-box}
  .quickactions>.btn:nth-child(1),.quickactions>.btn:nth-child(2){background:#61dfb7;color:#0b2620;border-color:#61dfb7}
  .quickactions>.btn,.moremenu>summary{font-size:13px;min-height:48px}
