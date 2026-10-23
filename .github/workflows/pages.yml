@@ -21,6 +21,16 @@ jobs:
         uses: actions/checkout@v4
       - name: Check index.html
         run: test -s index.html
+      - name: Check app JavaScript syntax
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs'), vm=require('node:vm');
+          const html=fs.readFileSync('index.html','utf8');
+          const scripts=[...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)].map(m=>m[1]).filter(s=>s.trim());
+          if (!scripts.length) throw new Error('No application JavaScript found');
+          for (const source of scripts) new vm.Script(source);
+          console.log('Validated', scripts.length, 'inline scripts');
+          NODE
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
