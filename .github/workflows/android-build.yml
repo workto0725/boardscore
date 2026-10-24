@@ -1,4 +1,4 @@
-name: BoardScore Plus Android Debug APK
+name: BoardScore Plus Android build
 on:
   workflow_dispatch:
   push:
@@ -24,8 +24,15 @@ jobs:
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - name: Build debug APK
         working-directory: android
-        run: gradle --no-daemon :app:assembleDebug
+        run: gradle --no-daemon :app:assembleDebug :app:bundleRelease
       - uses: actions/upload-artifact@v4
         with:
           name: boardscoreplus-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
+
+      - name: Upload unsigned release bundle (not Play Store ready)
+        uses: actions/upload-artifact@v4
+        with:
+          name: boardscoreplus-release-unsigned-aab
+          path: android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
