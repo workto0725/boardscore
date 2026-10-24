@@ -22,15 +22,28 @@ jobs:
           gradle-version: '8.13'
       - name: Install Android 36 SDK
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
-      - name: Build debug APK
+      - name: Build debug APK and unsigned AAB with diagnostic log
         working-directory: android
-        run: gradle --no-daemon :app:assembleDebug :app:bundleRelease
-      - uses: actions/upload-artifact@v4
+        shell: bash
+        run: |
+          set -o pipefail
+          gradle --no-daemon --stacktrace :app:assembleDebug :app:bundleRelease 2>&1 | tee build-output.log
+      - name: Upload build log even if build fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: boardscoreplus-build-log
+          path: android/build-output.log
+          if-no-files-found: warn
+      - name: Upload debug APK
+        if: success()
+        uses: actions/upload-artifact@v4
         with:
           name: boardscoreplus-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
-
-      - name: Upload unsigned release bundle (not Play Store ready)
+          if-no-files-found: error
+      - name: Upload unsigned release bundle
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: boardscoreplus-release-unsigned-aab
