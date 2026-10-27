@@ -12,6 +12,11 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run web regression checks
+        run: node tests/release-smoke.cjs
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
