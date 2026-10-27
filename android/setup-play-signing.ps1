@@ -46,8 +46,10 @@ try {
     $json=& $Gh secret list --repo $Repo --json name
     if ($LASTEXITCODE -ne 0) { throw 'Cannot read repository secret names.' }
     $names=@('BOARDSCORE_KEYSTORE_BASE64','BOARDSCORE_KEYSTORE_PASSWORD','BOARDSCORE_KEY_ALIAS','BOARDSCORE_KEY_PASSWORD')
-    $found=@($json | ConvertFrom-Json | Where-Object { $_.name -in $names })
-    if ($found.Count -gt 0) { throw 'Signing secrets already exist. Do not overwrite them or generate another key; verify the existing setup first.' }
+    $existing=ConvertFrom-Json -InputObject ($json -join [Environment]::NewLine)
+    foreach ($entry in $existing) {
+        if ($names -contains $entry.name) { throw 'Signing secrets already exist. Do not overwrite them or generate another key; verify the existing setup first.' }
+    }
     $cmd=Get-Command keytool.exe -ErrorAction SilentlyContinue
     $Keytool=if ($cmd) { $cmd.Source } else { Join-Path $env:ProgramFiles 'Android\Android Studio\jbr\bin\keytool.exe' }
     if (-not (Test-Path $Keytool)) { throw 'Android Studio JDK keytool.exe not found. Add the JDK bin folder to PATH.' }
