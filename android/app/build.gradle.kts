@@ -14,4 +14,4 @@ android {
 }
 
 // AdMob preview uses Google demo inventory. Production monetization remains disabled.
-dependencies { implementation("com.google.android.gms:play-services-ads:25.5.0") }
+dependencies { implementation("com.google.android.gms:play-services-ads:25.5.0"); implementation("com.google.android.ump:user-messaging-platform:4.0.0") }
