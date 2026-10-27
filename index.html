@@ -76,6 +76,24 @@
 .photo-choice-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.photo-choice-head b{margin:0}.photo-choice-close{background:transparent;color:#effff9;font-size:27px;line-height:1;width:36px;height:36px;border-radius:9px;display:grid;place-items:center}.photo-choice-close:focus-visible,.photo-choice-close:hover{background:#ffffff24}.photo-choice .bar>.danger{flex-basis:100%}
 .header-tools{display:flex;gap:6px;align-items:center}.header-tools .btn{white-space:nowrap}@media(max-width:400px){.header-tools .btn{font-size:11px;padding:8px 9px}.brand{font-size:17px}}
 .mafia-wide-game{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:18px 20px;margin-bottom:12px;border-radius:14px;border:1px solid #69bd9f;background:linear-gradient(115deg,#254d3d,#17372f);color:#effff8;text-decoration:none}.mafia-wide-game strong{display:block;font-size:18px;margin-bottom:5px}.mafia-wide-game small{display:block;color:#b6dfcf;line-height:1.5}.mafia-go{background:#80e7bb;color:#12372c;border-radius:9px;padding:10px 12px;white-space:nowrap;font-size:13px;font-weight:800}@media(max-width:420px){.mafia-wide-game{padding:14px 12px}.mafia-wide-game strong{font-size:16px}.mafia-go{padding:8px;font-size:11px}}
+
+/* In-page full-screen scoreboard: avoids mobile popup desktop-scale viewport */
+body.fsboard-lock{overflow:hidden}
+#fullscreenScoreboard{display:none;position:fixed;inset:0;z-index:9999;width:100%;height:100dvh;overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;background:#102522;color:#fff;padding:16px 14px 40px;font-family:system-ui,sans-serif}
+#fullscreenScoreboard.fsboard-open{display:block}
+.fsboard-top{display:flex;align-items:start;justify-content:space-between;gap:10px;margin-bottom:16px}
+.fsboard-top h1{font-size:clamp(19px,4.7vw,34px);line-height:1.35;margin:0;min-width:0}
+.fsboard-close{flex-shrink:0;background:#33574c;color:#fff;border:1px solid #6a9887;border-radius:10px;padding:10px 12px;font-size:14px}
+#fsboardRows{display:grid;width:100%;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fsboard-card{min-width:0;border-radius:14px;padding:clamp(12px,3vw,20px);background:#25443d;border:2px solid #4a7367}
+.fsboard-first{border-color:#ffd06b;background:#49432c}
+.fsboard-rank{font-size:13px;font-weight:700}
+.fsboard-name{font-size:clamp(16px,4vw,28px);font-weight:750;overflow-wrap:anywhere;margin:8px 0 6px}
+.fsboard-score{color:#77e8c3;font-size:clamp(34px,8vw,65px);line-height:1.15;font-weight:900;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.fsboard-first .fsboard-score{color:#ffdc85}
+.fsboard-note{font-size:12px;color:#afcdc2;margin-top:15px}
+@media(min-width:700px){#fsboardRows{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
+@media(min-width:1100px){#fsboardRows{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}}
 </style></head><body><header><div><div class="brand">🎲 모두의 <span>보드점수+</span></div><div class="sub">한 화면에 모이는 자동 점수판 · 36종 · v2.7</div></div><div class="header-tools"><button class="btn small" onclick="safeRefresh()" aria-label="새로고침">↻ 새로고침</button><button class="btn small" onclick="showHome()">게임 선택</button></div></header><input type="file" id="backupFile" accept="application/json,.json" hidden onchange="restoreBackup(event)"><main class="wrap"><div id="chooser"><div class="intro"><h1>어떤 게임을 하시나요?</h1><p>게임을 고르고 점수를 기록하세요.<br><strong style="color:#75eac4">QR로 친구들이 같은 게임방에 접속하면 각자 점수를 입력하고 모두의 점수와 순위를 함께 볼 수 있어요.</strong></p></div><section class="panel howto" aria-label="처음 사용하는 방법"><div class="top"><h2 class="sectiontitle" style="margin:0">시작 방법 · 딱 3단계</h2><button class="btn small" onclick="toggleFirstGuide()">사용 방법 접기/보기</button></div><div id="firstGuide" class="guide-steps"><div><b>① 게임 선택</b><span>아래 목록에서 게임을 누르세요.</span></div><div><b>② 함께할 사람 추가</b><span>플레이어 이름을 입력해요.</span></div><div><b>③ 점수 입력</b><span>점수를 넣으면 합계와 순위가 자동 계산돼요.</span></div></div><p class="helper" style="margin-bottom:0">※ 혼자 사용할 때는 공동 게임방 없이도 점수를 계산할 수 있어요. 공유 점수는 연결 상태에 따라 잠시 늦게 반영될 수 있어요.</p></section><details class="panel"><summary style="cursor:pointer;font-weight:800">📱 친구에게 앱 공유하기 · QR 보기</summary><div style="text-align:center;margin-top:12px"><img alt="모두의 보드점수+ 앱 접속 QR" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fworkto0725.github.io%2Fboardscore%2F" style="width:220px;max-width:90%;background:white;padding:8px;border-radius:12px"><p class="helper">앱 주소를 공유하는 QR입니다. 공동 게임방 QR은 게임을 선택한 뒤 만들 수 있어요.</p></div></details><div class="panel"><h2 class="sectiontitle">게임 찾기 <span class="pill">36종</span></h2><input class="search" id="search" placeholder="🔎 보드게임 검색" oninput="renderGames()"><div class="favorite-filter"><label><input type="checkbox" id="favoritesOnly" onchange="renderGames()"> ★ 즐겨찾기만 보기</label><span id="favoriteCount" class="muted">0개 즐겨찾기</span></div><div style="height:13px"></div><a href="mafia.html" class="mafia-wide-game"><span><strong>🎭 마피아게임</strong><small>사회자 없이 QR 입장 · 각자 비밀 역할 · 자동 진행</small></span><span class="mafia-go">시작하기 →</span></a><div class="games" id="games"></div></div></div><div id="session" class="hidden"><button type="button" id="roomConnectionBanner" class="room-connection-banner" onclick="openRoomStatus()" aria-live="polite">⚪ 오프라인 · 공동 게임방 미접속</button><div class="start-guide panel" id="sessionStartGuide"><strong>이제 무엇을 할까요?</strong><p>① 플레이어 이름 확인 · ② 점수 입력 · ③ 순위 확인</p><div class="bar"><button class="btn" onclick="openRoomStatus()">👥 친구와 같이 하기 · QR</button></div><small>혼자 기록할 때는 방을 만들 필요가 없어요.</small></div><div class="quickactions">
 <button class="btn primary" onclick="document.getElementById('forms').scrollIntoView({behavior:'smooth',block:'start'})">✏️ 점수 입력</button>
 
@@ -157,8 +175,35 @@ function undo(){const last=undoStack.pop();if(!last){toast('되돌릴 기록이 
 function downloadBackup(){const data={version:2,exportedAt:new Date().toISOString(),gameId,players:players.map(p=>({...p,houseAdjustment:0})),rounds,completed,gameSessions:Object.fromEntries(Object.entries(gameSessions).map(([k,v])=>[k,{...v,players:(v.players||[]).map(p=>({...p,houseAdjustment:0}))}]))};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='모두의보드점수_백업_'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),500)}
 async function restoreBackup(e){const file=e.target.files?.[0];e.target.value='';if(!file)return;try{if(file.size>2e6)throw Error('백업 파일이 너무 큽니다');const s=JSON.parse(await file.text());if(!s||!Array.isArray(s.players)||!Array.isArray(s.completed)||!GAME[s.gameId])throw Error('올바른 점수판 백업이 아닙니다');if(!confirm('현재 저장된 점수와 기록을 백업 내용으로 교체할까요?'))return;snapshot();gameId=s.gameId;players=s.players.slice(0,12).map((p,i)=>({id:p.id||i+1,name:String(p.name||`플레이어 ${i+1}`).slice(0,25),values:(p.values&&typeof p.values==='object')?p.values:{},rounds:Array.isArray(p.rounds)?p.rounds:[]}));completed=s.completed.slice(0,100);rounds=Math.max(1,Math.min(10,num(s.rounds)||10));gameSessions=(s.gameSessions&&typeof s.gameSessions==='object')?s.gameSessions:{};houseRules={};renderSession();persist();toast('백업을 복원했습니다. 임시 규칙은 기본값입니다')}catch(err){alert('복원 실패: '+err.message)}}
 let boardWindow=null;
-function openBoard(){if(!gameId)return;boardWindow=window.open('','_blank');if(!boardWindow){alert('팝업을 허용하면 점수판 전용 창이 열립니다.');return}boardWindow.document.open();boardWindow.document.write('<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>점수판</title><style>*{box-sizing:border-box}html,body{width:100%;min-width:0}body{margin:0;background:#102522;color:#fff;font:600 18px system-ui;padding:clamp(12px,3vw,32px)}h1{font-size:clamp(21px,4vw,42px);line-height:1.3;margin:0 0 18px}#rows{display:grid;width:100%;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,2vw,18px)}.p{min-width:0;background:#25443d;border:2px solid #4a7367;border-radius:16px;padding:clamp(12px,2.5vw,24px)}.first{border-color:#ffd06b;background:#49432c}.name{font-size:clamp(17px,2.6vw,32px);overflow-wrap:anywhere;margin:7px 0}.score{font-size:clamp(36px,6vw,78px);line-height:1.15;color:#77e8c3;font-weight:900;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.first .score{color:#ffdc85}.rank{font-size:clamp(13px,1.7vw,18px)}small{color:#afcdc2;font-size:12px}@media(min-width:700px){#rows{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(min-width:1100px){#rows{grid-template-columns:repeat(4,minmax(0,1fr))}}</style></head><body><h1 id="title"></h1><div id="rows"></div><p><small>입력 화면에서 점수가 바뀌면 자동 반영됩니다.</small></p></body></html>');boardWindow.document.close();syncBoard()}
-function syncBoard(){if(!boardWindow||boardWindow.closed||!gameId)return;try{const doc=boardWindow.document;doc.getElementById('title').textContent='🏆 '+GAME[gameId].name+' · 전체 점수판';const items=ranking();doc.getElementById('rows').innerHTML=items.map((x,i)=>`<div class="p ${i===0?'first':''}"><div class="rank">${i+1}위</div><div class="name">${safe(x.p.name)}</div><div class="score">${x.s.toLocaleString('ko-KR')}</div></div>`).join('')}catch(e){}}
+function openBoard(){
+ if(!gameId)return;
+ let overlay=document.getElementById('fullscreenScoreboard');
+ if(!overlay){
+  overlay=document.createElement('div');
+  overlay.id='fullscreenScoreboard';
+  overlay.setAttribute('role','dialog');
+  overlay.setAttribute('aria-modal','true');
+  overlay.setAttribute('aria-label','전체 점수판');
+  overlay.innerHTML='<div class="fsboard-top"><h1 id="fsboardTitle"></h1><button type="button" class="fsboard-close" onclick="closeBoard()">✕ 닫기</button></div><div id="fsboardRows"></div><p class="fsboard-note">점수를 입력하면 자동 반영됩니다.</p>';
+  document.body.appendChild(overlay);
+ }
+ overlay.classList.add('fsboard-open');
+ document.body.classList.add('fsboard-lock');
+ syncBoard();
+}
+function closeBoard(){
+ const overlay=document.getElementById('fullscreenScoreboard');
+ if(overlay)overlay.classList.remove('fsboard-open');
+ document.body.classList.remove('fsboard-lock');
+}
+function syncBoard(){
+ if(!gameId)return;
+ const overlay=document.getElementById('fullscreenScoreboard');
+ if(overlay&&overlay.classList.contains('fsboard-open')){
+  document.getElementById('fsboardTitle').textContent='🏆 '+GAME[gameId].name+' · 전체 점수판';
+  document.getElementById('fsboardRows').innerHTML=ranking().map((x,i)=>`<div class="fsboard-card ${i===0?'fsboard-first':''}"><div class="fsboard-rank">${i+1}위</div><div class="fsboard-name">${safe(x.p.name)}</div><div class="fsboard-score">${x.s.toLocaleString('ko-KR')}</div></div>`).join('');
+ }
+}
 const favoriteKey='boardscore-favorite-games-v1';
 let favoriteGames=(()=>{try{const list=JSON.parse(localStorage.getItem(favoriteKey));return Array.isArray(list)?list.filter(id=>Object.prototype.hasOwnProperty.call(GAME,id)):[]}catch{return []}})();
 function toggleFavorite(id){if(!Object.prototype.hasOwnProperty.call(GAME,id))return;favoriteGames=favoriteGames.includes(id)?favoriteGames.filter(x=>x!==id):[...favoriteGames,id];try{localStorage.setItem(favoriteKey,JSON.stringify(favoriteGames))}catch(e){toast('즐겨찾기 저장 공간을 확인해주세요')}renderGames()}
