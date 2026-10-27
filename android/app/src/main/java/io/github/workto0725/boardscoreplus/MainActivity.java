@@ -13,6 +13,10 @@ import android.webkit.*;
 import android.widget.Toast;
 import android.provider.MediaStore;
 import androidx.core.content.FileProvider;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import android.content.ContentValues;
 import android.os.Environment;
 import android.util.Base64;
@@ -45,7 +49,17 @@ public class MainActivity extends Activity {
    systemBackCallback=()->handleAppBack();
    getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT,systemBackCallback);
   }
-  root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);setContentView(root);
+  WindowCompat.setDecorFitsSystemWindows(getWindow(),false);
+  root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);
+  root.setBackgroundColor(Color.rgb(18,49,40));
+  ViewCompat.setOnApplyWindowInsetsListener(root,(view,insets)->{
+   Insets safe=insets.getInsets(WindowInsetsCompat.Type.systemBars()|WindowInsetsCompat.Type.displayCutout());
+   Insets keyboard=insets.getInsets(WindowInsetsCompat.Type.ime());
+   view.setPadding(safe.left,safe.top,safe.right,Math.max(safe.bottom,keyboard.bottom));
+   return WindowInsetsCompat.CONSUMED;
+  });
+  setContentView(root);
+  ViewCompat.requestApplyInsets(root);
   web=new WebView(this);root.addView(web,new LinearLayout.LayoutParams(-1,0,1f));
   previewAds=(getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)!=0;
   if(previewAds){

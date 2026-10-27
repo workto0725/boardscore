@@ -94,6 +94,29 @@ body.fsboard-lock{overflow:hidden}
 .fsboard-note{font-size:12px;color:#afcdc2;margin-top:15px}
 @media(min-width:700px){#fsboardRows{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
 @media(min-width:1100px){#fsboardRows{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}}
+
+/* Keep mobile headings and room controls readable at narrow widths. */
+header{padding-top:calc(14px + env(safe-area-inset-top,0px))}
+header>div:first-child{min-width:0}
+.brand{line-height:1.35;word-break:keep-all;overflow-wrap:break-word}
+.sub{line-height:1.5}
+#gametitle{word-break:keep-all;overflow-wrap:break-word;line-height:1.35}
+#currentRoomName{word-break:keep-all;overflow-wrap:break-word}
+@media(max-width:700px){
+ header{position:static;flex-wrap:wrap;align-items:flex-start}
+ header>div:first-child{flex:1 1 100%}
+ .header-tools{width:100%;justify-content:flex-end;flex-wrap:wrap}
+ .header-tools .btn{min-height:40px}
+ #gamePhotoCard>.top>div:first-child{flex:1 1 100%}
+ #gamePhotoCard .room-header-actions{width:100%;flex-direction:row;flex-wrap:wrap;justify-content:flex-end}
+ #gametitle{font-size:clamp(22px,6vw,30px)}
+ #onlineInvite>.bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:stretch}
+ #onlineInvite>.bar>.btn{width:100%;min-width:0;min-height:52px;flex:none;font-size:14px;padding:12px 10px;line-height:1.45;word-break:keep-all;overflow-wrap:break-word}
+}
+@media(max-width:360px){
+ #onlineInvite>.bar{grid-template-columns:1fr}
+}
+
 </style></head><body><header><div><div class="brand">🎲 모두의 <span>보드점수+</span></div><div class="sub">한 화면에 모이는 자동 점수판 · 36종 · v2.7</div></div><div class="header-tools"><button class="btn small" onclick="safeRefresh()" aria-label="새로고침">↻ 새로고침</button><button class="btn small" onclick="showHome()">게임 선택</button></div></header><input type="file" id="backupFile" accept="application/json,.json" hidden onchange="restoreBackup(event)"><main class="wrap"><div id="chooser"><div class="intro"><h1>어떤 게임을 하시나요?</h1><p>게임을 고르고 점수를 기록하세요.<br><strong style="color:#75eac4">QR로 친구들이 같은 게임방에 접속하면 각자 점수를 입력하고 모두의 점수와 순위를 함께 볼 수 있어요.</strong></p></div><section class="panel howto" aria-label="처음 사용하는 방법"><div class="top"><h2 class="sectiontitle" style="margin:0">시작 방법 · 딱 3단계</h2><button class="btn small" onclick="toggleFirstGuide()">사용 방법 접기/보기</button></div><div id="firstGuide" class="guide-steps"><div><b>① 게임 선택</b><span>아래 목록에서 게임을 누르세요.</span></div><div><b>② 함께할 사람 추가</b><span>플레이어 이름을 입력해요.</span></div><div><b>③ 점수 입력</b><span>점수를 넣으면 합계와 순위가 자동 계산돼요.</span></div></div><p class="helper" style="margin-bottom:0">※ 혼자 사용할 때는 공동 게임방 없이도 점수를 계산할 수 있어요. 공유 점수는 연결 상태에 따라 잠시 늦게 반영될 수 있어요.</p></section><details class="panel"><summary style="cursor:pointer;font-weight:800">📱 친구에게 앱 공유하기 · QR 보기</summary><div style="text-align:center;margin-top:12px"><img alt="모두의 보드점수+ 앱 접속 QR" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fworkto0725.github.io%2Fboardscore%2F" style="width:220px;max-width:90%;background:white;padding:8px;border-radius:12px"><p class="helper">앱 주소를 공유하는 QR입니다. 공동 게임방 QR은 게임을 선택한 뒤 만들 수 있어요.</p></div></details><div class="panel"><h2 class="sectiontitle">게임 찾기 <span class="pill">36종</span></h2><input class="search" id="search" placeholder="🔎 보드게임 검색" oninput="renderGames()"><div class="favorite-filter"><label><input type="checkbox" id="favoritesOnly" onchange="renderGames()"> ★ 즐겨찾기만 보기</label><span id="favoriteCount" class="muted">0개 즐겨찾기</span></div><div style="height:13px"></div><a href="mafia.html" class="mafia-wide-game"><span><strong>🎭 마피아게임</strong><small>사회자 없이 QR 입장 · 각자 비밀 역할 · 자동 진행</small></span><span class="mafia-go">시작하기 →</span></a><div class="games" id="games"></div></div></div><div id="session" class="hidden"><button type="button" id="roomConnectionBanner" class="room-connection-banner" onclick="openRoomStatus()" aria-live="polite">⚪ 오프라인 · 공동 게임방 미접속</button><div class="start-guide panel" id="sessionStartGuide"><strong>이제 무엇을 할까요?</strong><p>① 플레이어 이름 확인 · ② 점수 입력 · ③ 순위 확인</p><div class="bar"><button class="btn" onclick="openRoomStatus()">👥 친구와 같이 하기 · QR</button></div><small>혼자 기록할 때는 방을 만들 필요가 없어요.</small></div><div class="quickactions">
 <button class="btn primary" onclick="document.getElementById('forms').scrollIntoView({behavior:'smooth',block:'start'})">✏️ 점수 입력</button>
 
