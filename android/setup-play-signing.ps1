@@ -1,5 +1,6 @@
 # Windows PowerShell helper. Never prints key bytes/passwords or commits keys.
 $ErrorActionPreference = 'Stop'
+$secure=$null; $confirm=$null
 $Repo = 'workto0725/boardscore'
 $AliasName = 'boardscoreplus-upload'
 function Private-Run([string]$Exe,[string]$Arguments,[string]$Text,[string]$Password) {
@@ -28,7 +29,13 @@ try {
     Write-Host 'BoardScore Plus: local signing key, safe backup, GitHub Secrets and AAB build.'
     $cmd=Get-Command gh.exe -ErrorAction SilentlyContinue
     $Gh=if ($cmd) { $cmd.Source } else { Join-Path $env:ProgramFiles 'GitHub CLI\gh.exe' }
-    if (-not (Test-Path $Gh)) { throw 'Install GitHub CLI from https://cli.github.com/ and rerun.' }
+    if (-not (Test-Path $Gh)) {
+        $winget=Get-Command winget.exe -ErrorAction SilentlyContinue
+        if (-not $winget) { throw 'Install GitHub CLI from https://cli.github.com/ and rerun.' }
+        Write-Host 'Installing official GitHub CLI with Windows Package Manager.'
+        & winget.exe install --id GitHub.cli --exact --source winget
+        if ($LASTEXITCODE -ne 0 -or -not (Test-Path $Gh)) { throw 'GitHub CLI install incomplete. Install from https://cli.github.com/ and rerun.' }
+    }
     & $Gh auth status --hostname github.com
     if ($LASTEXITCODE -ne 0) {
         & $Gh auth login --hostname github.com --git-protocol https --web
