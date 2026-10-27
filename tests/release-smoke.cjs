@@ -1,0 +1,16 @@
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const html=fs.readFileSync('index.html','utf8');
+const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).filter(Boolean);
+assert(scripts.length>0,'App inline JavaScript not found');
+for(const body of scripts)new Function(body);
+assert(html.includes('function openBoard()'),'Full scoreboard missing');
+assert(html.includes("id='fullscreenScoreboard'"),'Responsive in-page scoreboard missing');
+assert(html.includes('function closeBoard()'),'Scoreboard exit missing');
+assert(html.includes('grid-template-columns:repeat(2,minmax(0,1fr))'),'Mobile 2-column scoreboard missing');
+assert(!html.includes("window.open('','boardscore_view','width=1100"),'Legacy fixed popup returned');
+assert(html.includes('function safeRefresh()'),'Safe refresh missing');
+assert(html.includes('function renderSession()'),'Game restoration missing');
+assert(html.includes('function syncBoard()'),'Scoreboard syncing missing');
+assert(html.includes('function renderGameGuide()'),'Rules help missing');
+console.log('BoardScore web smoke checks passed.');
