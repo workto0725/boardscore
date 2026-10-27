@@ -1,6 +1,11 @@
 name: BoardScore Plus signed Play AAB
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'android/app/build.gradle.kts'
+      - '.github/workflows/android-signed-aab.yml'
 jobs:
   signed-bundle:
     runs-on: ubuntu-latest
