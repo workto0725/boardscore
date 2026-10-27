@@ -38,7 +38,6 @@ public class MainActivity extends Activity {
   web=new WebView(this);root.addView(web,new LinearLayout.LayoutParams(-1,0,1f));
   previewAds=(getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)!=0;
   if(previewAds){
-   MobileAds.initialize(this, status->{});
    banner=new AdView(this);banner.setAdUnitId("ca-app-pub-3940256099942544/6300978111");banner.setAdSize(AdSize.BANNER);
    root.addView(banner,new LinearLayout.LayoutParams(-1,-2));
    banner.setVisibility(View.GONE);
@@ -111,7 +110,7 @@ public class MainActivity extends Activity {
  private void allowTestBanner(){
   if(!previewAds||banner==null)return;
   bannerAllowed=true;
-  if(!bannerRequested){bannerRequested=true;banner.loadAd(new AdRequest.Builder().build());}
+  if(!bannerRequested){bannerRequested=true;MobileAds.initialize(this,status->{});banner.loadAd(new AdRequest.Builder().build());}
   refreshBannerVisibility();
  }
  private void refreshBannerVisibility(){
