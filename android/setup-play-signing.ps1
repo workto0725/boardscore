@@ -33,8 +33,11 @@ try {
         $winget=Get-Command winget.exe -ErrorAction SilentlyContinue
         if (-not $winget) { throw 'Install GitHub CLI from https://cli.github.com/ and rerun.' }
         Write-Host 'Installing official GitHub CLI with Windows Package Manager.'
-        & winget.exe install --id GitHub.cli --exact --source winget
-        if ($LASTEXITCODE -ne 0 -or -not (Test-Path $Gh)) { throw 'GitHub CLI install incomplete. Install from https://cli.github.com/ and rerun.' }
+        & winget.exe install --id GitHub.cli --exact --source winget --accept-package-agreements --accept-source-agreements
+        if ($LASTEXITCODE -ne 0) { throw 'GitHub CLI install incomplete. Install from https://cli.github.com/ and rerun.' }
+        $possibleGh=@((Join-Path $env:ProgramFiles 'GitHub CLI\gh.exe'),(Join-Path $env:LOCALAPPDATA 'Programs\GitHub CLI\gh.exe'))
+        $Gh=$possibleGh | Where-Object { Test-Path $_ } | Select-Object -First 1
+        if (-not $Gh) { throw 'GitHub CLI installed but gh.exe was not found. Open a new PowerShell terminal and rerun.' }
     }
     & $Gh auth status --hostname github.com
     if ($LASTEXITCODE -ne 0) {
