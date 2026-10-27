@@ -12,13 +12,32 @@ import android.content.ContentValues;
 import android.os.Environment;
 import android.util.Base64;
 import java.io.OutputStream;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.content.pm.ApplicationInfo;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.MobileAds;
 public class MainActivity extends Activity {
  private static final String HOME="https://workto0725.github.io/boardscore/";
  private WebView web;
+ private AdView banner;
+ private LinearLayout root;
+ private boolean previewAds;
  private ValueCallback<Uri[]> picker;
  @Override public void onCreate(Bundle state){
   super.onCreate(state);
-  web=new WebView(this);setContentView(web);
+  root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);setContentView(root);
+  web=new WebView(this);root.addView(web,new LinearLayout.LayoutParams(-1,0,1f));
+  previewAds=(getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)!=0;
+  if(previewAds){
+   MobileAds.initialize(this, status->{});
+   banner=new AdView(this);banner.setAdUnitId("ca-app-pub-3940256099942544/6300978111");banner.setAdSize(AdSize.BANNER);
+   root.addView(banner,new LinearLayout.LayoutParams(-1,-2));
+   banner.setVisibility(View.GONE);
+   banner.loadAd(new AdRequest.Builder().build());
+  }
   web.setBackgroundColor(Color.rgb(18,49,40));
   WebSettings st=web.getSettings();
   st.setJavaScriptEnabled(true);st.setDomStorageEnabled(true);st.setAllowFileAccess(false);
@@ -32,6 +51,7 @@ public class MainActivity extends Activity {
    }
    @Override public void onPageFinished(WebView v,String url){
     if(!url.startsWith(HOME))return;
+    if(previewAds)v.evaluateJavascript("(function(){if(window.__boardscoreBannerWatch)return;window.__boardscoreBannerWatch=true;var home=document.getElementById('chooser');if(!home)return;function update(){BoardScoreDownload.showBanner(!home.classList.contains('hidden'))}new MutationObserver(update).observe(home,{attributes:true,attributeFilter:['class']});update()})();",null);
     v.evaluateJavascript("(function(){if(window.__boardscoreAndroidPng)return;window.__boardscoreAndroidPng=true;document.addEventListener('click',async function(e){const a=e.target.closest('a[download]');if(!a||!a.href.startsWith('blob:'))return;e.preventDefault();try{const b=await(await fetch(a.href)).blob();if(b.type&&b.type!=='image/png')throw Error('PNG only');const reader=new FileReader();reader.onload=function(){BoardScoreDownload.savePng(String(reader.result),a.download||'boardscore.png')};reader.readAsDataURL(b)}catch(e){alert('이미지 저장 실패: '+e.message)}},true)})();",null);
    }
   });
@@ -42,6 +62,10 @@ public class MainActivity extends Activity {
    }
   });
   web.addJavascriptInterface(new Object(){
+   @JavascriptInterface public void showBanner(boolean show){
+    runOnUiThread(()->{if(previewAds&&banner!=null)banner.setVisibility(show?View.VISIBLE:View.GONE);});
+   }
+
    @JavascriptInterface public void savePng(String dataUrl,String filename){
     runOnUiThread(()->{
      try{
@@ -74,5 +98,5 @@ public class MainActivity extends Activity {
   if(request==91&&picker!=null){picker.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(result,data));picker=null;}
  }
  @Override public void onBackPressed(){if(web!=null&&web.canGoBack())web.goBack();else super.onBackPressed();}
- @Override protected void onDestroy(){if(web!=null){web.destroy();web=null;}super.onDestroy();}
+ @Override protected void onDestroy(){if(banner!=null){banner.destroy();banner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
 }
