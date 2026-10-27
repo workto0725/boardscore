@@ -19,12 +19,18 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.ump.ConsentInformation;
+import com.google.android.ump.ConsentRequestParameters;
+import com.google.android.ump.UserMessagingPlatform;
 public class MainActivity extends Activity {
  private static final String HOME="https://workto0725.github.io/boardscore/";
  private WebView web;
  private AdView banner;
  private LinearLayout root;
  private boolean previewAds;
+ private boolean bannerAllowed=false;
+ private boolean bannerRequested=false;
+ private boolean homeVisible=false;
  private ValueCallback<Uri[]> picker;
  @Override public void onCreate(Bundle state){
   super.onCreate(state);
@@ -36,7 +42,7 @@ public class MainActivity extends Activity {
    banner=new AdView(this);banner.setAdUnitId("ca-app-pub-3940256099942544/6300978111");banner.setAdSize(AdSize.BANNER);
    root.addView(banner,new LinearLayout.LayoutParams(-1,-2));
    banner.setVisibility(View.GONE);
-   banner.loadAd(new AdRequest.Builder().build());
+   requestAdConsent();
   }
   web.setBackgroundColor(Color.rgb(18,49,40));
   WebSettings st=web.getSettings();
@@ -63,7 +69,7 @@ public class MainActivity extends Activity {
   });
   web.addJavascriptInterface(new Object(){
    @JavascriptInterface public void showBanner(boolean show){
-    runOnUiThread(()->{if(previewAds&&banner!=null)banner.setVisibility(show?View.VISIBLE:View.GONE);});
+    runOnUiThread(()->{homeVisible=show;refreshBannerVisibility();});
    }
 
    @JavascriptInterface public void savePng(String dataUrl,String filename){
@@ -91,6 +97,25 @@ public class MainActivity extends Activity {
    }
   },"BoardScoreDownload");
   if(state!=null)web.restoreState(state);else web.loadUrl(HOME+"?app_launch=home");
+ }
+ private void requestAdConsent(){
+  ConsentInformation info=UserMessagingPlatform.getConsentInformation(this);
+  ConsentRequestParameters params=new ConsentRequestParameters.Builder().build();
+  info.requestConsentInfoUpdate(this,params,()->{
+   UserMessagingPlatform.loadAndShowConsentFormIfRequired(this,error->{
+    if(info.canRequestAds())allowTestBanner();
+   });
+   if(info.canRequestAds())allowTestBanner();
+  },error->{if(info.canRequestAds())allowTestBanner();});
+ }
+ private void allowTestBanner(){
+  if(!previewAds||banner==null)return;
+  bannerAllowed=true;
+  if(!bannerRequested){bannerRequested=true;banner.loadAd(new AdRequest.Builder().build());}
+  refreshBannerVisibility();
+ }
+ private void refreshBannerVisibility(){
+  if(banner!=null)banner.setVisibility(previewAds&&bannerAllowed&&homeVisible?View.VISIBLE:View.GONE);
  }
  @Override protected void onSaveInstanceState(Bundle b){web.saveState(b);super.onSaveInstanceState(b);}
  @Override protected void onActivityResult(int request,int result,Intent data){
