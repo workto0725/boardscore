@@ -12,3 +12,6 @@ android {
  buildTypes { release { isMinifyEnabled = false } }
  compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
 }
+
+// AdMob preview uses Google demo inventory. Production monetization remains disabled.
+dependencies { implementation("com.google.android.gms:play-services-ads:25.5.0") }
