@@ -48,6 +48,10 @@ public class MainActivity extends Activity {
   st.setJavaScriptEnabled(true);st.setDomStorageEnabled(true);st.setAllowFileAccess(false);
   st.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
   web.setWebViewClient(new WebViewClient(){
+   @Override public void onPageStarted(WebView v,String url,android.graphics.Bitmap favicon){
+    homeVisible=false;
+    refreshBannerVisibility();
+   }
    @Override public boolean shouldOverrideUrlLoading(WebView v,WebResourceRequest req){
     Uri u=req.getUrl();
     if("https".equalsIgnoreCase(u.getScheme())&&"workto0725.github.io".equalsIgnoreCase(u.getHost())&&u.getPath()!=null&&u.getPath().startsWith("/boardscore/"))return false;
@@ -55,7 +59,7 @@ public class MainActivity extends Activity {
     return true;
    }
    @Override public void onPageFinished(WebView v,String url){
-    if(!url.startsWith(HOME))return;
+    if(!url.startsWith(HOME)){homeVisible=false;refreshBannerVisibility();return;}
     if(previewAds)v.evaluateJavascript("(function(){if(window.__boardscoreBannerWatch)return;window.__boardscoreBannerWatch=true;var home=document.getElementById('chooser');if(!home)return;function update(){BoardScoreDownload.showBanner(!home.classList.contains('hidden'))}new MutationObserver(update).observe(home,{attributes:true,attributeFilter:['class']});update()})();",null);
     v.evaluateJavascript("(function(){if(window.__boardscoreAndroidPng)return;window.__boardscoreAndroidPng=true;document.addEventListener('click',async function(e){const a=e.target.closest('a[download]');if(!a||!a.href.startsWith('blob:'))return;e.preventDefault();try{const b=await(await fetch(a.href)).blob();if(b.type&&b.type!=='image/png')throw Error('PNG only');const reader=new FileReader();reader.onload=function(){BoardScoreDownload.savePng(String(reader.result),a.download||'boardscore.png')};reader.readAsDataURL(b)}catch(e){alert('이미지 저장 실패: '+e.message)}},true)})();",null);
    }
