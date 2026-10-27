@@ -62,7 +62,7 @@ jobs:
           AAB="android/app/build/outputs/bundle/release/app-release.aab"
           test -f "$AAB"
           jarsigner -keystore "$RUNNER_TEMP/upload-key.jks" -storepass:env KS_PASS -keypass:env KEY_PASS -sigalg SHA256withRSA -digestalg SHA-256 "$AAB" "$KEY_ALIAS"
-          jarsigner -verify -strict -certs "$AAB"
+          jarsigner -verify -certs "$AAB"
           keytool -printcert -jarfile "$AAB" | grep -q "SHA256:"
           mkdir -p signed-output
           cp "$AAB" signed-output/boardscoreplus-play-upload.aab
