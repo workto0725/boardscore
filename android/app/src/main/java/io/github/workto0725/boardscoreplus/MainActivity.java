@@ -3,6 +3,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Build;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 import android.content.Intent;
 import android.content.ClipData;
 import android.graphics.Color;
@@ -36,8 +38,13 @@ public class MainActivity extends Activity {
  private boolean homeVisible=false;
  private ValueCallback<Uri[]> picker;
  private Uri cameraPhotoUri;
+ private OnBackInvokedCallback systemBackCallback;
  @Override public void onCreate(Bundle state){
   super.onCreate(state);
+  if(Build.VERSION.SDK_INT>=33){
+   systemBackCallback=()->handleAppBack();
+   getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT,systemBackCallback);
+  }
   root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);setContentView(root);
   web=new WebView(this);root.addView(web,new LinearLayout.LayoutParams(-1,0,1f));
   previewAds=(getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)!=0;
@@ -147,6 +154,9 @@ public class MainActivity extends Activity {
   }
  }
  @Override public void onBackPressed(){
+  handleAppBack();
+ }
+ private void handleAppBack(){
   if(web==null){super.onBackPressed();return;}
   String url=web.getUrl();
   if(url==null||!url.startsWith(HOME)){
@@ -169,5 +179,5 @@ public class MainActivity extends Activity {
      .show();
    });
  }
- @Override protected void onDestroy(){if(banner!=null){banner.destroy();banner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
+ @Override protected void onDestroy(){if(Build.VERSION.SDK_INT>=33&&systemBackCallback!=null){getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(systemBackCallback);systemBackCallback=null;}if(banner!=null){banner.destroy();banner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
 }
