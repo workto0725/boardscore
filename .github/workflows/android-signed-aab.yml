@@ -62,7 +62,8 @@ jobs:
           AAB="android/app/build/outputs/bundle/release/app-release.aab"
           test -f "$AAB"
           jarsigner -keystore "$RUNNER_TEMP/upload-key.jks" -storepass:env KS_PASS -keypass:env KEY_PASS -sigalg SHA256withRSA -digestalg SHA-256 "$AAB" "$KEY_ALIAS"
-          jarsigner -verify -certs "$AAB"
+          jarsigner -verify -strict -certs "$AAB"
+          keytool -printcert -jarfile "$AAB" | grep -q "SHA256:"
           mkdir -p signed-output
           cp "$AAB" signed-output/boardscoreplus-play-upload.aab
       - name: Upload signed Play Store bundle privately
@@ -71,7 +72,7 @@ jobs:
           name: boardscoreplus-play-upload-aab
           path: signed-output/boardscoreplus-play-upload.aab
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 30
       - name: Remove temporary upload key
         if: always()
         run: rm -f "$RUNNER_TEMP/upload-key.jks"
