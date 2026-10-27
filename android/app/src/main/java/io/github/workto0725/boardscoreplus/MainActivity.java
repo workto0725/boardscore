@@ -1,13 +1,16 @@
 package io.github.workto0725.boardscoreplus;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Build;
 import android.content.Intent;
+import android.content.ClipData;
 import android.graphics.Color;
 import android.net.Uri;
 import android.webkit.*;
 import android.widget.Toast;
 import android.provider.MediaStore;
+import androidx.core.content.FileProvider;
 import android.content.ContentValues;
 import android.os.Environment;
 import android.util.Base64;
@@ -32,6 +35,7 @@ public class MainActivity extends Activity {
  private boolean bannerRequested=false;
  private boolean homeVisible=false;
  private ValueCallback<Uri[]> picker;
+ private Uri cameraPhotoUri;
  @Override public void onCreate(Bundle state){
   super.onCreate(state);
   root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);setContentView(root);
@@ -67,7 +71,21 @@ public class MainActivity extends Activity {
   web.setWebChromeClient(new WebChromeClient(){
    @Override public boolean onShowFileChooser(WebView view,ValueCallback<Uri[]> cb,FileChooserParams params){
     if(picker!=null)picker.onReceiveValue(null);picker=cb;
-    try{startActivityForResult(params.createIntent(),91);return true;}catch(Exception e){picker=null;cb.onReceiveValue(null);return false;}
+    try{
+     if(params.isCaptureEnabled()){
+      java.io.File photo=java.io.File.createTempFile("boardscore_camera_",".jpg",getCacheDir());
+      cameraPhotoUri=FileProvider.getUriForFile(MainActivity.this,getPackageName()+".fileprovider",photo);
+      Intent camera=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+      camera.putExtra(MediaStore.EXTRA_OUTPUT,cameraPhotoUri);
+      camera.setClipData(ClipData.newRawUri("photo",cameraPhotoUri));
+      camera.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+      startActivityForResult(camera,91);
+     }else{
+      cameraPhotoUri=null;
+      startActivityForResult(params.createIntent(),91);
+     }
+     return true;
+    }catch(Exception e){cameraPhotoUri=null;picker=null;cb.onReceiveValue(null);Toast.makeText(MainActivity.this,"카메라 또는 사진을 열 수 없어요",Toast.LENGTH_SHORT).show();return false;}
    }
   });
   web.addJavascriptInterface(new Object(){
@@ -123,8 +141,33 @@ public class MainActivity extends Activity {
  @Override protected void onSaveInstanceState(Bundle b){web.saveState(b);super.onSaveInstanceState(b);}
  @Override protected void onActivityResult(int request,int result,Intent data){
   super.onActivityResult(request,result,data);
-  if(request==91&&picker!=null){picker.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(result,data));picker=null;}
+  if(request==91&&picker!=null){
+   Uri[] selected=result==RESULT_OK&&cameraPhotoUri!=null?new Uri[]{cameraPhotoUri}:WebChromeClient.FileChooserParams.parseResult(result,data);
+   picker.onReceiveValue(selected);picker=null;cameraPhotoUri=null;
+  }
  }
- @Override public void onBackPressed(){if(web!=null&&web.canGoBack())web.goBack();else super.onBackPressed();}
+ @Override public void onBackPressed(){
+  if(web==null){super.onBackPressed();return;}
+  String url=web.getUrl();
+  if(url==null||!url.startsWith(HOME)){
+   if(web.canGoBack())web.goBack();else web.loadUrl(HOME+"?app_launch=home");
+   return;
+  }
+  // The score screen uses in-page navigation, which WebView.canGoBack() cannot reliably detect.
+  web.evaluateJavascript("(function(){"+
+   "if(typeof closeGameOverlays==='function'&&closeGameOverlays())return 'handled';"+
+   "var dice=document.getElementById('diceOverlay');"+
+   "if(dice&&!dice.classList.contains('hidden')){if(typeof closeDice==='function')closeDice();return 'handled';}"+
+   "var session=document.getElementById('session');"+
+   "if(session&&!session.classList.contains('hidden')){if(typeof showHome==='function')showHome();return 'handled';}"+
+   "return 'exit';"+
+   "})()",result->{
+    if("\"exit\"".equals(result))new AlertDialog.Builder(this)
+     .setMessage("모두의 보드점수+를 종료할까요?")
+     .setNegativeButton("취소",(dialog,which)->{})
+     .setPositiveButton("종료",(dialog,which)->finish())
+     .show();
+   });
+ }
  @Override protected void onDestroy(){if(banner!=null){banner.destroy();banner=null;}if(web!=null){web.destroy();web=null;}super.onDestroy();}
 }
