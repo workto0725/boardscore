@@ -6,12 +6,12 @@ android {
   applicationId = "io.github.workto0725.boardscoreplus"
   minSdk = 26
   targetSdk = 36
-  versionCode = 1
-  versionName = "1.0.0"
+  versionCode = 2
+  versionName = "1.0.1"
  }
  buildTypes { release { isMinifyEnabled = false } }
  compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
 }
 
 // AdMob preview uses Google demo inventory. Production monetization remains disabled.
-dependencies { implementation("com.google.android.gms:play-services-ads:25.5.0"); implementation("com.google.android.ump:user-messaging-platform:4.0.0") }
+dependencies { implementation("com.google.android.gms:play-services-ads:25.5.0"); implementation("com.google.android.ump:user-messaging-platform:4.0.0"); implementation("androidx.core:core:1.15.0") }
