@@ -4,7 +4,7 @@ android {
  compileSdk = 36
  defaultConfig {
   applicationId = "io.github.workto0725.boardscoreplus"
-  minSdk = 26
+  minSdk = 24
   targetSdk = 36
   versionCode = 4
   versionName = "1.0.3"
