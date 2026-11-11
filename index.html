@@ -151,7 +151,8 @@ header>div:first-child{min-width:0}
 #gamePhotoCard .room-edit-panel .bar>.btn{min-height:42px;padding:7px 9px;font-size:12px;line-height:1.25;word-break:keep-all}
 #photoChoice .photo-choice-head{margin-bottom:7px}
 #photoChoice .photo-choice-close{width:28px;height:28px;font-size:21px}
-#photoChoice>.bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#photoChoice>.bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:6px;margin:0}
+#gamePhotoCard #photoChoice>.bar>.btn{display:grid;place-items:center;min-width:0;padding-inline:5px;text-align:center}
 @media(max-width:540px){
   #gamePhotoCard>.top:has(#roomHeaderTools:not(.hidden)){display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
   #gamePhotoCard>.top:has(#roomHeaderTools:not(.hidden)) #gametitle{margin:0!important;font-size:clamp(19px,5.4vw,25px)}
