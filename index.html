@@ -375,11 +375,28 @@ function goToPlayerScore(i){
       round=Array.from({length:rounds},(_,r)=>r).find(r=>player.rounds?.[r]?.bid==null||player.rounds?.[r]?.won==null)??rounds-1;
     }
     const cells=document.querySelectorAll(`#roundcontainer [data-score-player="${i}"][data-score-round="${round}"]`);
-    target=Array.from(cells).find(cell=>cell.querySelector('input:not(:disabled),select:not(:disabled)'))||target;
+    const roundEntry=player.rounds?.[round];
+    const missingWon=game.round&&roundEntry?.bid!=null&&roundEntry?.won==null;
+    target=(missingWon?cells[1]:Array.from(cells).find(cell=>cell.querySelector('input:not(:disabled),select:not(:disabled)')))||target;
   }
   if(!target)return;
   target.focus({preventScroll:true});
-  target.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
+  const scroller=target.closest('.rounds');
+  if(!scroller){
+    target.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'});
+    return;
+  }
+  const input=target.querySelector('input:not(:disabled),select:not(:disabled)')||target;
+  const inputRect=input.getBoundingClientRect();
+  const tableRect=scroller.getBoundingClientRect();
+  const stickyWidth=target.parentElement.cells[0].getBoundingClientRect().width;
+  const visibleCenter=tableRect.left+scroller.clientLeft+(stickyWidth+scroller.clientWidth)/2;
+  const left=scroller.scrollLeft+inputRect.left+inputRect.width/2-visibleCenter;
+  scroller.scrollTo({left,behavior:'smooth'});
+
+  const viewport=window.visualViewport;
+  const screenCenter=(viewport?.offsetTop??0)+(viewport?.height??window.innerHeight)/2;
+  window.scrollTo({top:window.scrollY+inputRect.top+inputRect.height/2-screenCenter,behavior:'smooth'});
 }
 function isMyScorePlayer(player){return !!onlineRoom&&String(player.id)===roomScorePlayerId()}
 function renderLeaders(){const items=ranking(),g=GAME[gameId];document.getElementById('leaders').innerHTML=items.map((x,i)=>`<button type="button" class="person ${i===0?'first':''}" onclick="goToPlayerScore(${x.i})" aria-label="${safe(x.p.name)} 점수 입력"><span class="rank">${i===0?'🏆 ':''}${i+1}위</span><span class="name${isMyScorePlayer(x.p)?' my-score-name':''}">${safe(x.p.name)}</span><span class="score">${x.s.toLocaleString('ko-KR')}</span>${onlineRoom&&x.p.scoreEdit?.room===onlineRoom&&typeof x.p.scoreEdit.by==='string'?`<span class="score-edit-notice">✎ ${safe(x.p.scoreEdit.by)}님이 수정</span>`:''}${g.tie?'<span class="detail">동점 기준: '+safe(String(val(x.p,g.tie)))+'</span>':''}</button>`).join('');let best=items[0],tie=items.length>1&&best.s===items[1].s&&(g.tie?val(best.p,g.tie)===val(items[1].p,g.tie):(gameId==='wonders'?val(best.p,'coins')===val(items[1].p,'coins'):true));document.getElementById('bottomwinner').textContent=best?(tie?'공동 선두':`🏆 ${best.p.name} 선두`):'플레이어를 추가하세요';document.getElementById('bottomsub').textContent=best?`${best.s.toLocaleString('ko-KR')}점 · ${players.length}${g.tichu?'팀':'명'} 참가`:'자동 저장';}
