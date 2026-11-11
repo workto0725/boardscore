@@ -121,6 +121,7 @@ header>div:first-child{min-width:0}
 <button class="btn primary" onclick="document.getElementById('forms').scrollIntoView({behavior:'smooth',block:'start'})">✏️ 점수 입력</button>
 
 <button class="btn" onclick="addPlayer()">＋ 플레이어 추가</button><button class="btn" onclick="togglePlayerManager()">👥 이름·삭제 관리</button><button class="btn" id="quickGuideBtn" onclick="toggleGameGuide()">📖 게임 설명서</button>
+<button class="btn" onclick="openBoard()">📺 점수판 전체화면</button>
 <details class="moremenu"><summary class="btn">☰ 더보기</summary>
 <div class="moreitems">
 <button class="btn" onclick="showHome()">← 게임 목록</button>
@@ -128,7 +129,6 @@ header>div:first-child{min-width:0}
 <button class="btn" onclick="undo()">↶ 실행 취소</button>
 <button class="btn" id="ruleBtn" onclick="toggleRules()">⚙️ 오늘만 규칙 수정</button>
 <button class="btn" onclick="toggleFeedback()">🚩 오류 신고·의견</button>
-<button class="btn" onclick="openBoard()">📺 점수판 전체화면</button>
 <button class="btn" onclick="downloadBackup()">↓ 백업</button>
 <button class="btn" onclick="document.getElementById('backupFile').click()">↑ 복원</button>
 <button class="btn" onclick="window.print()">인쇄</button>
