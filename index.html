@@ -404,7 +404,11 @@ function renderRoomScoreIdentity(){
   select.value=players.some(p=>String(p.id)===roomScorePlayerId())?roomScorePlayerId():'';
 }
 function selectRoomScorePlayer(id){
-  if(onlineRoom)sessionStorage.setItem('boardscore_score_player_'+onlineRoom,id);
+  if(!onlineRoom)return;
+  sessionStorage.setItem('boardscore_score_player_'+onlineRoom,id);
+  if(!id)return;
+  const index=players.findIndex(player=>String(player.id)===id);
+  if(index>=0)goToPlayerScore(index);
 }
 function allowRoomScoreEdit(i,input,changed){
   if(!onlineRoom)return true;
