@@ -22,6 +22,21 @@ return {fail,success,points};
 assert.equal(result.fail,-10,'Skull King: bonus must not count on missed bid');
 assert.equal(result.success,70,'Skull King: bonus counts on successful bid');
 assert.equal(result.points,25,'7 Wonders: 21 science + 4 coins');
+const skullAccumulation = vm.runInContext(`(()=>{
+  gameId='skull'; rounds=3;
+  const p={name:'A',values:{extra:0},rounds:[
+    {bid:1,won:1,bonus:10},
+    {bid:0,won:0,bonus:0},
+    {bid:2,won:2,bonus:5}
+  ]};
+  players=[p];
+  return {round1:skullTotalThrough(p,0),round2:skullTotalThrough(p,1),round3:skullTotalThrough(p,2),total:score(p)};
+})()`,ctx);
+assert.equal(skullAccumulation.round1,30,'Skull: first round scores 20+10');
+assert.equal(skullAccumulation.round2,50,'Skull: second round adds zero bid/won reward');
+assert.equal(skullAccumulation.round3,95,'Skull: third round adds 40+5');
+assert.equal(skullAccumulation.total,95,'Skull: player total equals running sum');
+console.log('Skull cumulative scoring checks passed',skullAccumulation);
 console.log('Scoring regression checks passed',result);
 
 const diceSource=source.slice(source.indexOf('const diceFaces='),source.indexOf('function showHome(fromHistory=false)'));
