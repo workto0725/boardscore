@@ -532,6 +532,21 @@ function roundConfirmRow(r){
 }
 function confirmRoundScore(r){
   document.activeElement?.blur();
+  // Keep new round inputs blank until confirmation; store omitted bid/won as 0.
+  if(gameId==='skull'){
+    const actorId=onlineRoom?roomScorePlayerId():null;
+    const eligible=players.filter(p=>!onlineRoom||(actorId&&String(p.id)===String(actorId)));
+    if(eligible.some(p=>['bid','won'].some(k=>p.rounds?.[r]?.[k]==null||p.rounds?.[r]?.[k]===''))){
+      snapshot();
+      for(const p of eligible){
+        if(!p.rounds)p.rounds=[];
+        if(!p.rounds[r])p.rounds[r]={};
+        for(const k of ['bid','won'])if(p.rounds[r][k]==null||p.rounds[r][k]==='')p.rounds[r][k]=0;
+      }
+      persist();renderRounds();renderLeaders();
+      players.forEach((p,i)=>{const subtotal=document.getElementById('subtotal'+i);if(subtotal)subtotal.textContent=score(p).toLocaleString('ko-KR')+'점'});
+    }
+  }
   const entries=players.map(p=>p.rounds?.[r]);
   document.getElementById('roundResultTitle').textContent=(r+1)+'라운드 점수';
   document.getElementById('roundResultScores').innerHTML=players.map((p,i)=>{
