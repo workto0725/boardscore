@@ -449,7 +449,25 @@ function goToPlayerScore(i){
 }
 function isMyScorePlayer(player){return !!onlineRoom&&String(player.id)===roomScorePlayerId()}
 function renderLeaders(){const items=ranking(),g=GAME[gameId];document.getElementById('leaders').innerHTML=items.map((x,i)=>`<button type="button" class="person ${i===0?'first':''}" onclick="goToPlayerScore(${x.i})" aria-label="${safe(x.p.name)} 점수 입력"><span class="rank">${i===0?'🏆 ':''}${i+1}위</span><span class="name${isMyScorePlayer(x.p)?' my-score-name':''}">${safe(x.p.name)}</span><span class="score">${x.s.toLocaleString('ko-KR')}</span>${onlineRoom&&x.p.scoreEdit?.room===onlineRoom&&typeof x.p.scoreEdit.by==='string'?`<span class="score-edit-notice">✎ ${safe(x.p.scoreEdit.by)}님이 수정</span>`:''}${g.tie?'<span class="detail">동점 기준: '+safe(String(val(x.p,g.tie)))+'</span>':''}</button>`).join('');let best=items[0],tie=items.length>1&&best.s===items[1].s&&(g.tie?val(best.p,g.tie)===val(items[1].p,g.tie):(gameId==='wonders'?val(best.p,'coins')===val(items[1].p,'coins'):true));document.getElementById('bottomwinner').textContent=best?(tie?'공동 선두':`🏆 ${best.p.name} 선두`):'플레이어를 추가하세요';document.getElementById('bottomsub').textContent=best?`${best.s.toLocaleString('ko-KR')}점 · ${players.length}${g.tichu?'팀':'명'} 참가`:'자동 저장';}
-function inputField(i,f){const roundLabel=fieldRoundLabel(f.key);return `<div class="field"><label>${safe(f.label)} <span class="unit">${num(rule().multipliers?.[f.key]??f.m)===0?((gameId==='formaggio'&&f.key==='unused'||gameId==='winnerscircle')?'자동 계산':'점수 미포함'):num(rule().multipliers?.[f.key]??f.m)===1?'':`× ${num(rule().multipliers?.[f.key]??f.m)}`}</span></label><input class="num" type="number" step="any" inputmode="decimal" placeholder="음수 입력 가능 (-10)" value="${val(players[i],f.key)}" aria-label="${safe(players[i].name+' '+f.label)}" oninput="setValue(${i},'${f.key}',this.value,this)"><button class="btn small" type="button" onclick="flipScoreSign(this,${i},'${f.key}')" aria-label="점수 부호 바꾸기">±</button></div>${roundLabel?`<div class="bar"><button class="btn small primary" type="button" onclick="confirmFieldRound(${i},'${f.key}')">${roundLabel} 확인</button></div>`:''}`}
+function formaggioScoreKeys(last=false){
+  if(gameId!=='formaggio')return '';
+  return ` data-formaggio-score enterkeyhint="${last?'done':'next'}" onkeydown="advanceFormaggioScore(event)"`;
+}
+function advanceFormaggioScore(event){
+  if(event.key!=='Enter'||event.isComposing)return;
+  event.preventDefault();
+  const input=event.currentTarget;
+  const inputs=Array.from(document.querySelectorAll('#forms [data-formaggio-score]'));
+  const next=inputs[inputs.indexOf(input)+1];
+  if(next){
+    next.focus();
+    return;
+  }
+  const form=input.closest('.playerform');
+  input.blur();
+  form.querySelector('.bar .primary').click();
+}
+function inputField(i,f){const roundLabel=fieldRoundLabel(f.key);return `<div class="field"><label>${safe(f.label)} <span class="unit">${num(rule().multipliers?.[f.key]??f.m)===0?((gameId==='formaggio'&&f.key==='unused'||gameId==='winnerscircle')?'자동 계산':'점수 미포함'):num(rule().multipliers?.[f.key]??f.m)===1?'':`× ${num(rule().multipliers?.[f.key]??f.m)}`}</span></label><input class="num" type="number" step="any" inputmode="decimal" ${gameId==='formaggio'?'':'placeholder="음수 입력 가능 (-10)"'} value="${gameId==='formaggio'&&players[i].values[f.key]==null?'':val(players[i],f.key)}"${formaggioScoreKeys()} aria-label="${safe(players[i].name+' '+f.label)}" oninput="setValue(${i},'${f.key}',this.value,this)"><button class="btn small" type="button" onclick="flipScoreSign(this,${i},'${f.key}')" aria-label="점수 부호 바꾸기">±</button></div>${roundLabel?`<div class="bar"><button class="btn small primary" type="button" onclick="confirmFieldRound(${i},'${f.key}')">${roundLabel} 확인</button></div>`:''}`}
 let scoreNamesFrame=0;
 function scheduleScoreNames(){
   if(scoreNamesFrame)return;
@@ -489,10 +507,18 @@ function updateScoreNames(){
 window.addEventListener('scroll',scheduleScoreNames,{passive:true,capture:true});
 window.addEventListener('resize',scheduleScoreNames,{passive:true});
 window.addEventListener('load',scheduleScoreNames);
-function renderFields(){scheduleScoreNames();const g=GAME[gameId];document.getElementById('forms').innerHTML=players.map((p,i)=>`<div class="playerform" id="playerScoreForm${i}" tabindex="-1"><div class="formtitle"><input class="search${isMyScorePlayer(p)?' my-score-name':''}" style="padding:8px;max-width:170px" aria-label="플레이어 이름" value="${safe(p.name)}" onchange="rename(${i},this.value)"/><button class="btn small danger" onclick="removePlayer(${i})" aria-label="플레이어 삭제">×</button></div>${g.fields.map(f=>inputField(i,f)).join('')}<div class="field"><label>오늘만 개인 점수 보정 <span class="unit">(+/− 점수)</span></label><input class="num" type="number" step="any" inputmode="decimal" value="${num(p.houseAdjustment)}" aria-label="${safe(p.name)} 임시 점수 보정" oninput="setAdjustment(${i},this.value,this)"><button class="btn small" type="button" onclick="flipAdjustmentSign(this,${i})" aria-label="점수 보정 부호 바꾸기">±</button></div><div class="calcresult">현재 합계 <strong id="subtotal${i}">${score(p).toLocaleString('ko-KR')}점</strong></div><div class="bar"><button class="btn primary" type="button" onclick="confirmPlayerScore(${i})" aria-label="${safe(p.name)} 점수 확인">✓ 점수 확인</button></div></div>`).join('');renderRounds()}
+function renderFields(){scheduleScoreNames();const g=GAME[gameId];document.getElementById('forms').innerHTML=players.map((p,i)=>`<div class="playerform" id="playerScoreForm${i}" tabindex="-1"><div class="formtitle"><input class="search${isMyScorePlayer(p)?' my-score-name':''}" style="padding:8px;max-width:170px" aria-label="플레이어 이름" value="${safe(p.name)}" onchange="rename(${i},this.value)"/><button class="btn small danger" onclick="removePlayer(${i})" aria-label="플레이어 삭제">×</button></div>${g.fields.map(f=>inputField(i,f)).join('')}<div class="field"><label>오늘만 개인 점수 보정 <span class="unit">(+/− 점수)</span></label><input class="num" type="number" step="any" inputmode="decimal" value="${gameId==='formaggio'&&!p.houseAdjustment?'':num(p.houseAdjustment)}"${formaggioScoreKeys(i===players.length-1)} aria-label="${safe(p.name)} 임시 점수 보정" oninput="setAdjustment(${i},this.value,this)"><button class="btn small" type="button" onclick="flipAdjustmentSign(this,${i})" aria-label="점수 보정 부호 바꾸기">±</button></div><div class="calcresult">현재 합계 <strong id="subtotal${i}">${score(p).toLocaleString('ko-KR')}점</strong></div><div class="bar"><button class="btn primary" type="button" onclick="confirmPlayerScore(${i})" aria-label="${safe(p.name)} 점수 확인">✓ 점수 확인</button></div></div>`).join('');renderRounds()}
 function confirmPlayerScore(i){
   const player=players[i];
   if(!player)return;
+  if(gameId==='formaggio'){
+    const next=document.querySelector(`#playerScoreForm${i+1} [data-formaggio-score]`);
+    if(next){
+      next.focus();
+      toast(player.name+' · '+score(player).toLocaleString('ko-KR')+'점');
+      return;
+    }
+  }
   document.getElementById('leaders').closest('section').scrollIntoView({behavior:'smooth',block:'start'});
   toast(player.name+' · '+score(player).toLocaleString('ko-KR')+'점');
 }
@@ -548,7 +574,7 @@ function markRoomScoreEdit(i){
   const target=players[i],actor=players.find(p=>String(p.id)===roomScorePlayerId());
   if(onlineRoom&&target&&actor&&target!==actor)target.scoreEdit={id:crypto.randomUUID(),room:onlineRoom,by:actor.name};
 }
-function setValue(i,key,value,input){if(!players[i]||!allowRoomScoreEdit(i,input,num(value)!==val(players[i],key)))return;snapshot();markRoomScoreEdit(i);players[i].values[key]=num(value);document.getElementById('subtotal'+i).textContent=score(players[i]).toLocaleString('ko-KR')+'점';renderLeaders();persist()}
+function setValue(i,key,value,input){const player=players[i];if(!player)return;const clear=gameId==='formaggio'&&value==='';const next=clear?undefined:num(value);const previous=gameId==='formaggio'?player.values[key]:val(player,key);if(!allowRoomScoreEdit(i,input,next!==previous))return;snapshot();markRoomScoreEdit(i);if(clear)delete player.values[key];else player.values[key]=next;document.getElementById('subtotal'+i).textContent=score(players[i]).toLocaleString('ko-KR')+'점';renderLeaders();persist()}
 function setAdjustment(i,value,input){if(!players[i]||!allowRoomScoreEdit(i,input,num(value)!==num(players[i].houseAdjustment)))return;snapshot();markRoomScoreEdit(i);players[i].houseAdjustment=num(value);document.getElementById('subtotal'+i).textContent=score(players[i]).toLocaleString('ko-KR')+'점';renderLeaders();persist()}
 function toggleRules(){const el=document.getElementById('rulepanel');el.classList.toggle('hidden');if(!el.classList.contains('hidden')){renderRuleEditor();el.scrollIntoView({behavior:'smooth',block:'start'})}}
 function renderRuleEditor(){if(!gameId)return;const g=GAME[gameId],r=rule(),changes=Object.keys(r.multipliers||{}).length+Object.keys(r.skull||{}).length;document.getElementById('ruleBtn').textContent=changes?'⚙️ 오늘만 규칙 수정 ('+changes+')':'⚙️ 오늘만 규칙 수정';document.getElementById('ruleBtn').classList.toggle('ruleactive',changes>0);let html='<p class="muted">아래 배수는 모든 플레이어에게 적용됩니다. 기본 계산식이 복잡한 게임에서는 원래 계산식에 <b>(수정 배수−기본 배수)×입력값</b>을 추가로 보정합니다. 플레이어별 임시 보정 점수도 별도로 입력할 수 있습니다.</p><div class="rulegrid">';for(const f of g.fields)html+=`<div class="ruleitem"><label>${safe(f.label)} <span class="muted">(기본 × ${f.m})</span></label><input type="number" step="any" value="${num(r.multipliers?.[f.key]??f.m)}" onchange="setRuleMultiplier('${f.key}',this.value)" aria-label="${safe(f.label)} 오늘만 배수"></div>`;html+='</div>';if(g.round){html+='<h3>스컬킹 라운드 계산 규칙</h3><div class="rulegrid">';for(const [key,label,base] of [['hit','예측 성공: 트릭당 점수',20],['miss','예측 실패: 차이당 감점',-10],['zeroWin','0트릭 성공: 라운드당 점수',10],['zeroLose','0트릭 실패: 라운드당 감점',-10]])html+=`<div class="ruleitem"><label>${label} <span class="muted">(기본 ${base})</span></label><input type="number" step="any" value="${num(r.skull?.[key]??base)}" onchange="setSkullRule('${key}',this.value)"></div>`;html+='</div>'}document.getElementById('ruleeditor').innerHTML=html;renderPresets()}
