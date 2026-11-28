@@ -10,7 +10,7 @@ assert(html.includes('function closeBoard()'),'Scoreboard exit missing');
 assert(html.includes('grid-template-columns:repeat(2,minmax(0,1fr))'),'Mobile 2-column scoreboard missing');
 assert(!html.includes("window.open('','boardscore_view','width=1100"),'Legacy fixed popup returned');
 assert(html.includes('function safeRefresh()'),'Safe refresh missing');
-assert(html.includes('function renderSession()'),'Game restoration missing');
+assert(/function renderSession\([^)]*\)/.test(html),'Game restoration missing');
 assert(html.includes('function syncBoard()'),'Scoreboard syncing missing');
 assert(html.includes('function renderGameGuide()'),'Rules help missing');
 console.log('BoardScore web smoke checks passed.');
